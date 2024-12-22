@@ -51,5 +51,5 @@ The **Slouch Detection System** transforms a standard chair into a smart device 
 ---
 
 ## Contact
-For inquiries or collaborations, feel free to reach out at [your_email@example.com].
+For inquiries or collaborations, feel free to reach out at [tushar16803@gmail.com]/9575837469.
 
