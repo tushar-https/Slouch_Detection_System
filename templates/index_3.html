@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slouch Detection Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #73C2FB, #4B79A1);
+            color: #333;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .dashboard {
+            width: 80%;
+            max-width: 1200px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+        .history-section {
+            background: #F9FAFC;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            height: 300px;
+            overflow-y: auto;
+        }
+        .slouch-summary {
+            background: #F9FAFC;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .history-section h3,
+        .slouch-summary h3 {
+            margin: 0 0 10px;
+            font-size: 1.2em;
+        }
+        .history-section p,
+        .slouch-summary p {
+            margin: 5px 0;
+            font-size: 1em;
+            color: #555;
+        }
+        .chair {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .chair img {
+            height: 200px;
+            width: 200px;
+            transition: opacity 0.3s ease;
+        }
+        .active {
+            opacity: 1; /* Fully visible for active state */
+        }
+        .inactive {
+            opacity: 0.5; /* Dimmed for inactive state */
+        }
+        .status-indicator {
+            margin-top: 10px;
+            font-size: 1.2em;
+            padding: 5px 10px;
+            border-radius: 5px;
+            text-align: center;
+            background-color: #4CAF50; /* Green for correct posture */
+            color: white;
+        }
+        .inactive-status {
+            background-color: #f44336; /* Red for slouching */
+        }
+        #slouchNotification {
+            color: red;
+            font-size: 1.2em;
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
+    <script>
+        async function fetchStats() {
+            try {
+                const response = await fetch('/get_slouching_stats');
+                const data = await response.json();
+
+                console.log(data); // Debugging log
+
+                // Update slouch count
+                document.getElementById('slouchCount').innerText = `Slouch Count: ${data.slouch_count}`;
+
+                // Update slouch history
+                const historyList = document.getElementById('slouchHistory');
+                historyList.innerHTML = '';
+                data.slouch_history.forEach(entry => {
+                    const item = document.createElement('p');
+                    item.innerText = `Time: ${entry.timestamp}, Value: ${entry.sensor_value}`;
+                    historyList.appendChild(item);
+                });
+
+                // Update chair state and notification
+                const chairIcon = document.querySelector('.chair img');
+                const statusIndicator = document.getElementById('statusIndicator');
+                const slouchNotification = document.getElementById('slouchNotification');
+
+                if (dsata.is_slouching == 0) { // Check for slouching
+                    //chairIcon.classList.add('inactive');
+                    chairIcon.classList.remove('active');
+                    statusIndicator.innerText = "Slouching";
+                    statusIndicator.classList.add('inactive-status');
+                    statusIndicator.classList.remove('status-indicator');
+
+                    // Display notification
+                    slouchNotification.innerText = "Warning: Slouching Detected!";
+                    slouchNotification.style.display = 'block';
+                } else { // Correct posture
+                    chairIcon.classList.add('active');
+                    chairIcon.classList.remove('inactive');
+                    statusIndicator.innerText = "Correct Posture";
+                    statusIndicator.classList.add('status-indicator');
+                    statusIndicator.classList.remove('inactive-status');
+
+                    // Hide notification
+                    slouchNotification.innerText = "";
+                    slouchNotification.style.display = 'none';
+                }
+            } catch (error) {
+                console.error("Error fetching stats:", error);
+            }
+        }
+
+        // Fetch stats every 5 seconds
+        setInterval(fetchStats, 5000);
+        fetchStats(); // Initial fetch
+    </script>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Chair Section -->
+        <div class="chair">
+            <img 
+                class="chart_icon active" 
+                src="{{ url_for('static', filename='img/chair.svg') }}" 
+                alt="Chair Status">
+            <div id="statusIndicator" class="status-indicator">Correct Posture</div> <!-- Correct Posture / Slouching Indicator -->
+        </div> 
+
+        <!-- Slouch Notification -->
+        <div id="slouchNotification"></div> <!-- Slouching Warning -->
+
+        <!-- History Section -->
+        <div class="history-section">
+            <h3>Slouch History</h3>
+            <div id="slouchHistory"></div>
+        </div>
+
+        <!-- Slouch Summary -->
+        <div class="slouch-summary">
+            <h3>Slouch Summary</h3>
+            <p id="slouchCount">Slouch Count: 0</p>
+        </div>
+    </div>
+</body>
+</html>

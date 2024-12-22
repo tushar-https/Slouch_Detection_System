@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LED Control</title>
+    
+<!-- jQuery 1.11.1 (Compatible with jQuery Mobile 1.4.5) -->
+<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+
+<!-- jQuery Mobile 1.4.5 -->
+<script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+
+
+    </head>
+<body>
+    
+    <form>
+        <label for="flip">LED Control:</label>
+        <select id="flip" name="flip" data-role="slider">
+            <option value="off">Off</option>
+            <option value="on">On</option>
+        </select>
+    </form>
+        <script>
+            $(function() {
+                $('#flip').change(function() {
+                    // Get the selected value
+                    const state = $('#flip').val();
+
+                    // Send the value to the server
+                    $.getJSON('/_led', { state: state }, function(response) {
+                        console.log("LED state updated to:", state);
+                    }).fail(function() {
+                        console.error("Error: Unable to update LED state.");
+                    });
+                });
+            });
+        </script>
+</body>
+</html>

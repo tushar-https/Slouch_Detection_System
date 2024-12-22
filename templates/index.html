@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slouch Detection Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #73C2FB, #4B79A1);
+            color: #333;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .header {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .dashboard {
+            width: 80%;
+            max-width: 1200px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .status-indicator {
+            padding: 10px 20px;
+            border-radius: 20px;
+            background: #FF6666;
+            color: white;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .status-indicator.active {
+            background: #4CAF50;
+        }
+        .slouch-counter {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        .chair-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .chair-image {
+            width: 40%;
+            max-width: 300px;
+            margin-bottom: 15px;
+        }
+        .history-section {
+            background: #F9FAFC;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            max-height: 300px;
+            overflow-y: scroll;
+            margin-top: 20px;
+            width: 100%;
+        }
+        .history-section h3 {
+            margin: 0 0 10px;
+            font-size: 1.2em;
+        }
+        .history-section p {
+            margin: 5px 0;
+            font-size: 1em;
+            color: #555;
+        }
+    </style>
+    <script>
+        let slouchCount = 0;
+        const slouchHistory = [];
+
+        async function fetchSensorData() {
+            const response = await fetch('/get_sensor');
+            const data = await response.json();
+
+            const chairStatus = document.getElementById('chairStatus');
+            const historyList = document.getElementById('slouchHistory');
+            const slouchCounter = document.getElementById('slouchCounter');
+
+            if (data.sensor_value !== null && data.sensor_value > 400) {
+                chairStatus.innerText = "Slouch Detected!";
+                chairStatus.classList.add("active");
+
+                slouchCount++;
+                slouchCounter.innerText = `Slouch Count: ${slouchCount}`;
+
+                slouchHistory.push({ time: new Date().toLocaleTimeString(), value: data.sensor_value });
+
+                const historyItem = document.createElement('p');
+                historyItem.innerText = `Time: ${new Date().toLocaleTimeString()}, Value: ${data.sensor_value}`;
+                historyList.appendChild(historyItem);
+            } else {
+                chairStatus.innerText = "No Slouch";
+                chairStatus.classList.remove("active");
+            }
+        }
+
+        setInterval(fetchSensorData, 5000);
+    </script>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">Slouch Detection System</div>
+
+    <!-- Dashboard Section -->
+    <div class="dashboard">
+        <!-- Chair Image and Status -->
+        <div class="chair-section">
+            <img src="{{ url_for('static', filename='img/chair.svg') }}" alt="Chair" class="chair-image">
+            <div id="chairStatus" class="status-indicator">No Slouch</div>
+        </div>
+
+        <!-- Slouch Counter -->
+        <div id="slouchCounter" class="slouch-counter">Slouch Count: 0</div>
+
+        <!-- Slouch History Section -->
+        <div class="history-section">
+            <h3>Slouch History</h3>
+            <div id="slouchHistory"></div>
+        </div>
+    </div>
+</body>
+</html>
