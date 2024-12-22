@@ -1,0 +1,24 @@
+<html>
+	<body>
+	<h1>Hello From template static</h1>
+	</body>
+<script>
+
+	
+${	
+function()
+{
+$('#flip').change(function()
+{
+$.getJSON('/_led',{state:$('#flip').val()});
+}
+});
+
+});
+/script>
+	<form>
+	<select name='flip' data-role="slider" style="float:left;">
+	<option value="off">off</option> 
+
+	</form>
+</html>

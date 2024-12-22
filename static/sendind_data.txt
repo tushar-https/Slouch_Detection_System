@@ -1,0 +1,30 @@
+from flask import Flask, request
+import csv
+import os
+
+app = Flask(__name__)
+
+# Define the CSV file path
+csv_file_path = "flex_sensor_data.csv"
+
+@app.route('/logdata', methods=['GET'])
+def log_data():
+    # Retrieve sensor values from the request
+    sensor_value = request.args.get('sensor_value', type=int)
+    label = request.args.get('label', type=int)
+
+    # Ensure the CSV file exists; if not, create it with headers
+    if not os.path.exists(csv_file_path):
+        with open(csv_file_path, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(['SensorValue', 'Label'])  # Add headers
+
+    # Append the data to the CSV file
+    with open(csv_file_path, mode='a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow([sensor_value, label])  # Add data row
+
+    return f"Logged: SensorValue={sensor_value}, Label={label}"
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
